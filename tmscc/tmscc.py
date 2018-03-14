@@ -1,12 +1,6 @@
 """Main module."""
-
-from abc import ABCMeta
-
-
-class TopicModelBase(ABCMeta):
-    def __init__(self, outdir, sampling_method='gibbs'):
-        self.outdir = outdir
-        self.sampling_method = sampling_method
+from pathlib import Path
 
 
-class 
+PROJECT_ROOT_DIR = Path('../').resolve()
+JARFILE_PATH = PROJECT_ROOT_DIR + '/genePAM.jar'
