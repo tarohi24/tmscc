@@ -1,0 +1,37 @@
+=======================================
+Topic Models for Single Cell Clustering
+=======================================
+
+
+.. image:: https://img.shields.io/pypi/v/tmscc.svg
+        :target: https://pypi.python.org/pypi/tmscc
+
+.. image:: https://img.shields.io/travis/tarohi24/tmscc.svg
+        :target: https://travis-ci.org/tarohi24/tmscc
+
+.. image:: https://readthedocs.org/projects/tmscc/badge/?version=latest
+        :target: https://tmscc.readthedocs.io/en/latest/?badge=latest
+        :alt: Documentation Status
+
+
+
+
+A package for reducing dimension of gene expression profiles and doing clustering them.
+
+
+* Free software: MIT license
+* Documentation: https://tmscc.readthedocs.io.
+
+
+Features
+--------
+
+* TODO
+
+Credits
+-------
+
+This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
+
+.. _Cookiecutter: https://github.com/audreyr/cookiecutter
+.. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
