@@ -44,36 +44,66 @@ class LDA(TopicModelBase):
         if len(gene_names) != profile.shape[0]:
             raise AssertionError('gene_name\'s length must be same as the'
                                  'number of rows of the profile.')
-        self.gene_names = gene_names
+
+        outputfile_fmt = self.outdir.resolve() + '/{0}-{1}'
+        self.theta_file = Path(
+            outputfile_fmt.format(self.n_topics, 'theta.txt'))
+        self.phi_file = Path(
+            outputfile_fmt.format(self.n_topics, 'phi.txt'))
+
+        self.theta = None
+        self.phi = None
 
     def estimate(self):
-        if 
+        def _estimate_mallet(self):
+            """
+            the result will be stored in the outdir you specified
+            """
+            datafp = tempfile.NamedTemporaryFile()
+            np.savetxt(datafp.name, self.profile.T, delimiter=',')
+            genefp = tempfile.NamedTemporaryFile()
+            genefp.write(','.join(self.gene_names))
 
-    def _estimete_mallet(self):
+            cmd = ['java',
+                   '-jar',
+                   JARFILE_PATH,
+                   str(self.n_topics),
+                   datafp.fname,
+                   genefp.fname,
+                   self.theta_file.resolve(),
+                   self.phi_file.resolve(),
+                   str(self.sampler.n_thread),
+                   str(self.sampler.n_burnin)]
+
+            procs.append(subprocess.Popen(' '.join(cmd), shell=True))
+            datafp.close()
+            genepf.close()
+
+        def _estimate_celltree(self):
+            # TODO
+            pass
+
+        if isinstance(self.sampler, GibbsSampler):
+            _estimate_mallet()
+        else:
+            _estimate_celltree()
+
+    def load_params(self):
         """
-        the result will be stored in the outdir you specified
+        load results of estimate()
+        parameters will be in self.theta (cells*topics matrix) and
+        self.phi (words*topics matrix).
         """
-        datafp = tempfile.NamedTemporaryFile()
-        np.savetxt(datafp.name, self.profile.T, delimiter=',')
-        genefp = tempfile.NamedTemporaryFile()
-        genefp.write(','.join(self.gene_names))
-        outputfile_fmt = self.outdir.resolve() + '/{0}-{1}'
+        if not self.theta_file.exists():
+            raise AssertionError('execute estimate() before calling this'
+                                 'method.')
+        else:
+            self.theta = np.loadtxt(self.theta_file.resolve(), delimiter=',')
+        
+        if not self.phi_file.exists():
+            raise AssertionError('execute estimate() before calling this'
+                                 'method.')
+        else:
+            self.phi = np.loadtxt(self.phi_file.resolve(), delimiter=',')
 
-        cmd = ['java',
-               '-jar',
-               JARFILE_PATH,
-               str(self.n_topics),
-               datafp.fname,
-               genefp.fname,
-               outputfile_fmt.format(self.n_topics, 'theta.txt'),
-               outputfile_fmt.format(self.n_topics, 'phi.txt'),
-               str(self.sampler.n_thread),
-               str(self.sampler.n_burnin)]
-
-        procs.append(subprocess.Popen(' '.join(cmd), shell=True))
-        datafp.close()
-        genepf.close()
-
-    def _estimate_celltree(self):
-        # TODO
-        pass
+        return (self.theta, self.phi)
