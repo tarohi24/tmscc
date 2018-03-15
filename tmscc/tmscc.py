@@ -2,5 +2,5 @@
 from pathlib import Path
 
 
-PROJECT_ROOT_DIR = Path('../').resolve()
-JARFILE_PATH = PROJECT_ROOT_DIR + '/genePAM.jar'
+PROJECT_ROOT = Path('../').resolve()
+JARFILE_PATH = PROJECT_ROOT.joinpath('genePAM.jar')
