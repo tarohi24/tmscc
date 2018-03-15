@@ -18,6 +18,21 @@ Topic Models for Single Cell Clustering
 
 A package for reducing dimension of gene expression profiles and doing clustering them.
 
+Installation
+-------
+
+`pip install tmmsc`
+
+Example
+-------
+.. code-block:: python
+   import tmmsc
+   import numpy as np
+   import pandas as pd
+
+   
+
+
 
 * Free software: MIT license
 * Documentation: https://tmscc.readthedocs.io.
@@ -28,10 +43,14 @@ Features
 
 * TODO
 
+
+Requirements
+-------
+
+* Python >= 3.5
+* Java >= 1.8
+
 Credits
 -------
 
-This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
-
-.. _Cookiecutter: https://github.com/audreyr/cookiecutter
-.. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
+* This 

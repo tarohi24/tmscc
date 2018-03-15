@@ -33,48 +33,44 @@ class LDA(TopicModelBase):
         super(LDA, self).__init__(outdir, sampler)
         self.n_topics = int(n_topics)
         self.profile = profile
-        profile.astype = int
 
         outputfile_fmt = str(self.outdir.resolve()) + '/{0}-{1}'
+        self.profile_file = self.outdir.joinpath('profile.txt')
+
+        profile.to_csv(
+            str(self.profile_file.resolve()), sep=',',
+            index=False, header=False)
+        self.gene_file = self.outdir.joinpath('genes.txt')
+        with open(self.gene_file, 'w') as fp:
+            fp.write(','.join(self.profile.index.tolist()))
+
         self.theta_file = Path(
             outputfile_fmt.format(self.n_topics, 'theta.txt'))
         self.phi_file = Path(
             outputfile_fmt.format(self.n_topics, 'phi.txt'))
 
         self.is_trained = False
-        self.theta = None
-        self.phi = None
 
     def _estimate_mallet(self):
         """
         the result will be stored in the outdir you specified
         """
-        sys.stderr.write('\rreading daraframe...')
-        datafp = tempfile.NamedTemporaryFile()
-        np.savetxt(datafp.name, self.profile.T, delimiter=',', fmt='%d')
-        genefp = tempfile.NamedTemporaryFile()
-        genefp.write(str.encode(','.join(self.profile.index.tolist())))
-        sys.stderr.flush()
-
-        sys.stderr.write('\rexecuting commands...')
         cmd = ['java',
                '-jar',
                str(JARFILE_PATH.resolve()),
                str(self.n_topics),
-               datafp.name,
-               genefp.name,
+               str(self.profile_file.resolve()),
+               str(self.gene_file.resolve()),
                str(self.theta_file.resolve()),
                str(self.phi_file.resolve()),
                str(self.sampler.n_thread),
+               str(self.sampler.n_iter),
                str(self.sampler.n_burnin)]
         
-        print(' '.join(cmd))
+        sys.stderr.write('executing commands...')
         proc = subprocess.Popen(' '.join(cmd), shell=True)
         proc.wait()
-        sys.stderr.flush()
-
-        datafp.close()
-        genefp.close()
+        sys.stderr.write('\ndone!')
 
     def _estimate_celltree(self):
         # TODO
@@ -87,25 +83,47 @@ class LDA(TopicModelBase):
         else:
             self._estimate_celltree()
 
-    def load_params(self):
-        """
-        load results of estimate()
-        parameters will be in self.theta (cells*topics matrix) and
-        self.phi (words*topics matrix).
-        """
+    def theta(self):
         if not self.theta_file.exists():
             raise AssertionError('execute estimate() before calling this'
                                  'method.')
         else:
-            self.theta = np.loadtxt(self.theta_file.resolve(), delimiter=',')
-        
+            theta = np.loadtxt(self.theta_file.resolve(), delimiter=',')
+            return theta
+
+    def _phi_to_mat(self):
+        mask = 2 ** (self.n_topics-1).bit_length() - 1
+        mask_len = mask.bit_length()
+
+        with open(self.phi_file, 'r') as f:
+            phidata = [
+                [int(i) for i in l[:-1].split(',')] for l in f.readlines()
+            ]
+
+        phi = [
+            [
+                (v & mask, v >> mask_len) for v in lst if v != 0
+            ]
+            for lst in phidata
+        ]
+
+        phi_mat = np.zeros([len(phi), self.n_topics])
+        for i, lst in enumerate(phi):
+            for topic, count in lst:
+                try:
+                    phi_mat[i][topic] = count
+                except:
+                    print(i, topic, n_topics)
+
+        return phi_mat
+
+    def phi(self):
         if not self.phi_file.exists():
             raise AssertionError('execute estimate() before calling this'
                                  'method.')
         else:
-            self.phi = np.loadtxt(self.phi_file.resolve(), delimiter=',')
+            return self._phi_to_mat()
 
-        return (self.theta, self.phi)
 
     def __repr__(self):
         return '''
@@ -114,4 +132,3 @@ class LDA(TopicModelBase):
         trained: {1},
         sampler: {2}
         '''.format(self.n_topics, self.is_trained, self.sampler)
-        
