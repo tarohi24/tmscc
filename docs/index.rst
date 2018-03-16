@@ -1,4 +1,4 @@
-Welcome to Topic Models for Single Cell Clustering's documentation!
+Topic Models for Single Cell Clustering's documentation
 ======================================
 
 .. toctree::

@@ -69,4 +69,6 @@ Requirements
 Credits
 -------
 
-* This package owes what this is to `Mallet http://mallet.cs.umass.edu/`_. Thank you for the wonderful toolkit!
+* This package owes what this is to `Mallet`_. Thank you for the wonderful toolkit!
+  
+.. _Mallet: http://mallet.cs.umass.edu/
