@@ -29,6 +29,7 @@ for more information, see https://tmscc.readthedocs.io/en/latest/installation.ht
 Example
 -------
 .. code-block:: python
+
    from tm import LDA
    import numpy as np
    import pandas as pd
