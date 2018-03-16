@@ -2,7 +2,7 @@ Welcome to Topic Models for Single Cell Clustering's documentation!
 ======================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
 
    readme

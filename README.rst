@@ -20,9 +20,11 @@ A package for reducing dimension of gene expression profiles and doing clusterin
 
 Installation
 -------
+.. code-block:: console
 
-`pip install tmmsc`
+   $ pip install tmmsc
 
+for more information, see https://tmscc.readthedocs.io/en/latest/installation.html.
 
 Example
 -------
@@ -67,4 +69,4 @@ Requirements
 Credits
 -------
 
-* This package owes what this is to `Mallet http://mallet.cs.umass.edu/`. Thank you for the wonderful toolkit!
+* This package owes what this is to `Mallet http://mallet.cs.umass.edu/`_. Thank you for the wonderful toolkit!
