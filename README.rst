@@ -23,15 +23,29 @@ Installation
 
 `pip install tmmsc`
 
+
 Example
 -------
 .. code-block:: python
-   import tmmsc
+   from tm import LDA
    import numpy as np
    import pandas as pd
+   from sklearn.cluster import KMeans
 
-   
+   profile = pd.DataFrame(
+       np.arange(200).reshape([5, 40])
+   )  # gene expression profile (genes*cells matrix)
+   profile.index = ['CHEK2', 'MSH2', 'PTEN', 'TSC1', 'HER2']
 
+   lda = tm.LDA(
+       n_topics=4,
+       profile=profile,
+       outdir='~/tmp',
+   )
+   # LDA's estimation (This takes some time.)
+   lda.estimate()
+   # lda's theta() can be used for clustering, such as k-means
+   kmeans = KMeans(n_clusters=2).fit_predict(lda.theta())
 
 
 * Free software: MIT license
@@ -53,4 +67,4 @@ Requirements
 Credits
 -------
 
-* This 
+* This package owes what this is to `Mallet http://mallet.cs.umass.edu/`. Thank you for the wonderful toolkit!
