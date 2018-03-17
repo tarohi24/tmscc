@@ -4,8 +4,8 @@ import subprocess
 import sys
 import tempfile
 
-from tmscc import JARFILE_PATH
-from sampler import GibbsSampler
+from .conf import JARFILE_PATH
+from .sampler import GibbsSampler
 
 
 class TopicModelBase(object):
