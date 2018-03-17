@@ -9,18 +9,19 @@ from .sampler import GibbsSampler
 
 
 class TopicModelBase(object):
-    def __init__(self, outdir, sampler='default'):
+    def __init__(self, outdir, sampler='default', sampler_opts=None):
         self.outdir = Path(outdir).expanduser().resolve()
         if not self.outdir.is_dir():
             raise AssertionError('{0} is not an directory.'.format(self.outdir))
         if sampler == 'default':
-            self.sampler = GibbsSampler(n_iter=1000, n_burnin=100)
+            self.sampler = GibbsSampler(**sampler_opts)
         else:
             self.sampler = sampler
 
 
 class LDA(TopicModelBase):
-    def __init__(self, n_topics, profile, outdir, sampler='default'):
+    def __init__(self, n_topics, profile, outdir, sampler='default',
+                 sampler_opts=None):
         """
         params:
         n_topics:
@@ -30,14 +31,14 @@ class LDA(TopicModelBase):
             a pandas dataframe whose shape is (n_genes, n_cells)
             profile's index should be the gene names
         """
-        super(LDA, self).__init__(outdir, sampler)
+        super(LDA, self).__init__(outdir, sampler, sampler_opts)
         self.n_topics = int(n_topics)
         self.profile = profile
 
         outputfile_fmt = str(self.outdir.resolve()) + '/{0}-{1}'
         self.profile_file = self.outdir.joinpath('profile.txt')
 
-        profile.to_csv(
+        profile.T.to_csv(
             str(self.profile_file.resolve()), sep=',',
             index=False, header=False)
         self.gene_file = self.outdir.joinpath('genes.txt')
@@ -110,10 +111,7 @@ class LDA(TopicModelBase):
         phi_mat = np.zeros([len(phi), self.n_topics])
         for i, lst in enumerate(phi):
             for topic, count in lst:
-                try:
-                    phi_mat[i][topic] = count
-                except:
-                    print(i, topic, n_topics)
+                phi_mat[i][topic] = count
 
         return phi_mat
 
