@@ -22,7 +22,7 @@ Installation
 -------
 .. code-block:: console
 
-   $ pip install tmmsc
+   $ pip install tmscc
 
 for more information, see https://tmscc.readthedocs.io/en/latest/installation.html.
 
@@ -30,7 +30,7 @@ Example
 -------
 .. code-block:: python
 
-   from tm import LDA
+   from tmscc import tm
    import numpy as np
    import pandas as pd
    from sklearn.cluster import KMeans
