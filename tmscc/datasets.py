@@ -13,7 +13,7 @@ def load_klein():
     """
     datadir = Path(__file__).parent.parent.joinpath('data/klein')
     profile = pd.read_csv(datadir.joinpath('profile.txt'), index_col=0)
-    with open(datadir.joinpath('labels.txt'), 'r') as f:
+    with open(str(datadir.joinpath('labels.txt').resolve()), 'r') as f:
         labels = f.read().split()
     return (profile, labels)
     
