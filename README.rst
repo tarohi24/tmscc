@@ -30,20 +30,22 @@ Example
 -------
 .. code-block:: python
 
-   from tmscc import tm, datasets
-   from sklearn.cluster import KMeans
+    import tm
+    import datasets
+    from sklearn.cluster import KMeans
 
-   # load sample data
-   profile, labels = datasets.load_klein()
-   lda = tm.LDA(
+    # load sample data (Klein 2015)
+    profile, labels = datasets.load_klein()
+    lda = tm.LDA(
        n_topics=4,
        profile=profile,
        outdir='~/tmp',
-   )
-   # LDA's estimation (This takes some time.)
-   lda.estimate()
-   # lda's theta can be used for clustering, such as k-means
-   kmeans = KMeans(n_clusters=10).fit_predict(lda.theta)
+       sampler_opts={'n_iter': 100}
+    )
+    # LDA's estimation (This takes some time.)
+    lda.estimate()
+    # lda's theta() can be used for clustering, such as k-means
+    kmeans = KMeans(n_clusters=10).fit_predict(lda.theta)
 
 
 * Free software: MIT license
