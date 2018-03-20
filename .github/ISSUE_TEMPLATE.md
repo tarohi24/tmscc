@@ -1,4 +1,4 @@
-* Topic Models for Single Cell Clustering version:
+* Package version:
 * Python version:
 * Operating System:
 

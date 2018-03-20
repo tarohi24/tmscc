@@ -4,8 +4,8 @@ import subprocess
 import sys
 import tempfile
 
-from .conf import JARFILE_PATH
-from .sampler import GibbsSampler
+import conf
+from sampler import GibbsSampler
 
 
 class TopicModelBase(object):
@@ -15,7 +15,10 @@ class TopicModelBase(object):
             raise AssertionError(
                 '{0} is not an directory.'.format(self.outdir))
         if sampler == 'default':
-            self.sampler = GibbsSampler(**sampler_opts)
+            if sampler_opts is not None:
+                self.sampler = GibbsSampler(**sampler_opts)
+            else:
+                self.sampler = GibbsSampler()
         else:
             self.sampler = sampler
 
@@ -91,7 +94,7 @@ class LDA(TopicModelBase):
         """
         cmd = ['java',
                '-jar',
-               str(JARFILE_PATH.resolve()),
+               str(conf.JARFILE_PATH.resolve()),
                str(self.n_topics),
                str(self.profile_file.resolve()),
                str(self.gene_file.resolve()),
