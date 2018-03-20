@@ -4,25 +4,25 @@ import subprocess
 import sys
 import tempfile
 
-from tmscc import JARFILE_PATH
-from sampler import GibbsSampler
+from .conf import JARFILE_PATH
+from .sampler import GibbsSampler
 
 
 class TopicModelBase(object):
-    def __init__(self, outdir, sampler='default'):
+    def __init__(self, outdir, sampler='default', sampler_opts=None):
         self.outdir = Path(outdir).expanduser().resolve()
         if not self.outdir.is_dir():
             raise AssertionError(
                 '{0} is not an directory.'.format(self.outdir))
         if sampler == 'default':
-            self.sampler = GibbsSampler(n_iter=1000, n_burnin=100)
+            self.sampler = GibbsSampler(**sampler_opts)
         else:
             self.sampler = sampler
 
 
 class LDA(TopicModelBase):
     def __init__(self, n_topics, profile, outdir, sampler='default',
-                 labels=None):
+                 labels=None, sampler_opts=None):
         """
         params:
         n_topics:
@@ -34,14 +34,14 @@ class LDA(TopicModelBase):
         labels:
             cluster labels
         """
-        super(LDA, self).__init__(outdir, sampler)
+        super(LDA, self).__init__(outdir, sampler, sampler_opts)
         self.n_topics = int(n_topics)
         self.profile = profile
 
         outputfile_fmt = str(self.outdir.resolve()) + '/{0}-{1}'
         self.profile_file = self.outdir.joinpath('profile.txt')
 
-        profile.to_csv(
+        profile.T.to_csv(
             str(self.profile_file.resolve()), sep=',',
             index=False, header=False)
         self.gene_file = self.outdir.joinpath('genes.txt')
@@ -111,6 +111,7 @@ class LDA(TopicModelBase):
 
     def _estimate_celltree(self):
         # TODO
+        sys.stderr.write('This sampler has not implemented yet.')
         pass
 
     def estimate(self):
@@ -119,6 +120,45 @@ class LDA(TopicModelBase):
             self._estimate_mallet()
         else:
             self._estimate_celltree()
+
+    def theta(self):
+        if not self.theta_file.exists():
+            raise AssertionError('execute estimate() before calling this'
+                                 'method.')
+        else:
+            theta = np.loadtxt(self.theta_file.resolve(), delimiter=',')
+            return theta
+
+    def _phi_to_mat(self):
+        mask = 2 ** (self.n_topics-1).bit_length() - 1
+        mask_len = mask.bit_length()
+
+        with open(self.phi_file, 'r') as f:
+            phidata = [
+                [int(i) for i in l[:-1].split(',')] for l in f.readlines()
+            ]
+
+        phi = [
+            [
+                (v & mask, v >> mask_len) for v in lst if v != 0
+            ]
+            for lst in phidata
+        ]
+
+        phi_mat = np.zeros([len(phi), self.n_topics])
+        for i, lst in enumerate(phi):
+            for topic, count in lst:
+                phi_mat[i][topic] = count
+
+        return phi_mat
+
+    def phi(self):
+        if not self.phi_file.exists():
+            raise AssertionError('execute estimate() before calling this'
+                                 'method.')
+        else:
+            return self._phi_to_mat()
+
 
     def __repr__(self):
         return '''
