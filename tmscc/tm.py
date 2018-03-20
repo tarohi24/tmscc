@@ -4,8 +4,8 @@ import subprocess
 import sys
 import tempfile
 
-import conf
-from sampler import GibbsSampler
+from . import conf
+from .sampler import GibbsSampler
 
 
 class TopicModelBase(object):
