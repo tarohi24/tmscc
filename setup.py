@@ -13,7 +13,7 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = ['numpy', 'pandas', 'sklearn', 'scipy']
+requirements = ['numpy', 'pandas', 'sklearn', 'scipy', 'matplotlib']
 
 setup_requirements = [ ]
 
