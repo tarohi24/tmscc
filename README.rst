@@ -30,7 +30,7 @@ Example
 -------
 .. code-block:: python
 
-    import tm
+    from tmscc import tm
     import datasets
     from sklearn.cluster import KMeans
 
