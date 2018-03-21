@@ -30,25 +30,22 @@ Example
 -------
 .. code-block:: python
 
-   from tmscc import tm
-   import numpy as np
-   import pandas as pd
-   from sklearn.cluster import KMeans
+    from tmscc import tm
+    import datasets
+    from sklearn.cluster import KMeans
 
-   profile = pd.DataFrame(
-       np.arange(200).reshape([5, 40])
-   )  # gene expression profile (genes*cells matrix)
-   profile.index = ['CHEK2', 'MSH2', 'PTEN', 'TSC1', 'HER2']
-
-   lda = tm.LDA(
+    # load sample data (Klein 2015)
+    profile, labels = datasets.load_klein()
+    lda = tm.LDA(
        n_topics=4,
        profile=profile,
        outdir='~/tmp',
-   )
-   # LDA's estimation (This takes some time.)
-   lda.estimate()
-   # lda's theta() can be used for clustering, such as k-means
-   kmeans = KMeans(n_clusters=2).fit_predict(lda.theta())
+       sampler_opts={'n_iter': 100}
+    )
+    # LDA's estimation (This takes some time.)
+    lda.estimate()
+    # lda's theta() can be used for clustering, such as k-means
+    kmeans = KMeans(n_clusters=10).fit_predict(lda.theta)
 
 
 * Free software: MIT license

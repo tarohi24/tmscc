@@ -4,7 +4,7 @@ import subprocess
 import sys
 import tempfile
 
-from .conf import JARFILE_PATH
+from . import conf
 from .sampler import GibbsSampler
 
 
@@ -15,7 +15,10 @@ class TopicModelBase(object):
             raise AssertionError(
                 '{0} is not an directory.'.format(self.outdir))
         if sampler == 'default':
-            self.sampler = GibbsSampler(**sampler_opts)
+            if sampler_opts is not None:
+                self.sampler = GibbsSampler(**sampler_opts)
+            else:
+                self.sampler = GibbsSampler()
         else:
             self.sampler = sampler
 
@@ -85,13 +88,21 @@ class LDA(TopicModelBase):
 
         return phi_mat
 
+    def load_theta(self):
+        self.theta = np.loadtxt(self.theta_file.resolve(), delimiter=',')
+        return self.theta
+
+    def load_phi(self):
+        self.phi = LDA._phi_to_mat(self.phi_file, self.n_topics)
+        return self.phi
+
     def _estimate_mallet(self):
         """
         the result will be stored in the outdir you specified
         """
         cmd = ['java',
                '-jar',
-               str(JARFILE_PATH.resolve()),
+               str(conf.JARFILE_PATH.resolve()),
                str(self.n_topics),
                str(self.profile_file.resolve()),
                str(self.gene_file.resolve()),
@@ -105,8 +116,8 @@ class LDA(TopicModelBase):
         proc = subprocess.Popen(' '.join(cmd), shell=True)
         proc.wait()
         sys.stderr.write('loading result...')
-        self.theta = np.loadtxt(self.theta_file.resolve(), delimiter=',')
-        self.phi = type(self)._phi_to_mat(self.phi_file, self.n_topics)
+        self.load_theta()
+        self.load_phi()
         sys.stderr.write('\ndone!')
 
     def _estimate_celltree(self):
@@ -120,45 +131,6 @@ class LDA(TopicModelBase):
             self._estimate_mallet()
         else:
             self._estimate_celltree()
-
-    def theta(self):
-        if not self.theta_file.exists():
-            raise AssertionError('execute estimate() before calling this'
-                                 'method.')
-        else:
-            theta = np.loadtxt(self.theta_file.resolve(), delimiter=',')
-            return theta
-
-    def _phi_to_mat(self):
-        mask = 2 ** (self.n_topics-1).bit_length() - 1
-        mask_len = mask.bit_length()
-
-        with open(self.phi_file, 'r') as f:
-            phidata = [
-                [int(i) for i in l[:-1].split(',')] for l in f.readlines()
-            ]
-
-        phi = [
-            [
-                (v & mask, v >> mask_len) for v in lst if v != 0
-            ]
-            for lst in phidata
-        ]
-
-        phi_mat = np.zeros([len(phi), self.n_topics])
-        for i, lst in enumerate(phi):
-            for topic, count in lst:
-                phi_mat[i][topic] = count
-
-        return phi_mat
-
-    def phi(self):
-        if not self.phi_file.exists():
-            raise AssertionError('execute estimate() before calling this'
-                                 'method.')
-        else:
-            return self._phi_to_mat()
-
 
     def __repr__(self):
         return '''
