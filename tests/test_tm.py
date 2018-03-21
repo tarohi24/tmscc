@@ -14,13 +14,15 @@ class TestLDA(unittest.TestCase):
         self.sampler = GibbsSampler(
             n_iter=100
         )
-        self.outdir = Path(__file__).parent.joinpath('data').resolve()
+
+    def test_init(self):
+        profile, _ = datasets.load_klein()
+        
 
     def test_estimate_klein(self):
         profile, _ = datasets.load_klein()
         lda = LDA(
             n_topics=4,
             profile=profile,
-            outdir=str(self.outdir),
         )
         lda.estimate()

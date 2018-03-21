@@ -1,5 +1,7 @@
+from gensim.models.ldamulticore import LdaMulticore
 from pathlib import Path
 import numpy as np
+from scipy import sparse
 import subprocess
 import sys
 import tempfile
@@ -9,11 +11,7 @@ from .sampler import GibbsSampler
 
 
 class TopicModelBase(object):
-    def __init__(self, outdir, sampler='default', sampler_opts=None):
-        self.outdir = Path(outdir).expanduser().resolve()
-        if not self.outdir.is_dir():
-            raise AssertionError(
-                '{0} is not an directory.'.format(self.outdir))
+    def __init__(self, sampler='default', sampler_opts=None):
         if sampler == 'default':
             if sampler_opts is not None:
                 self.sampler = GibbsSampler(**sampler_opts)
@@ -24,7 +22,7 @@ class TopicModelBase(object):
 
 
 class LDA(TopicModelBase):
-    def __init__(self, n_topics, profile, outdir, sampler='default',
+    def __init__(self, n_topics, profile, sampler='default',
                  labels=None, sampler_opts=None):
         """
         params:
@@ -37,30 +35,26 @@ class LDA(TopicModelBase):
         labels:
             cluster labels
         """
-        super(LDA, self).__init__(outdir, sampler, sampler_opts)
+        super(LDA, self).__init__(sampler=sampler, sampler_opts=sampler_opts)
         self.n_topics = int(n_topics)
         self.profile = profile
 
-        outputfile_fmt = str(self.outdir.resolve()) + '/{0}-{1}'
-        self.profile_file = self.outdir.joinpath('profile.txt')
-
-        profile.T.to_csv(
-            str(self.profile_file.resolve()), sep=',',
-            index=False, header=False)
-        self.gene_file = self.outdir.joinpath('genes.txt')
-        with open(self.gene_file, 'w') as fp:
-            fp.write(','.join(self.profile.index.tolist()))
-
-        self.theta_file = Path(
-            outputfile_fmt.format(self.n_topics, 'theta.txt'))
-        self.phi_file = Path(
-            outputfile_fmt.format(self.n_topics, 'phi.txt'))
-
+        self.corpus, self.id2word = LDA._profile_to_corpus(profile)
         self.is_trained = False
         self.theta = None
         self.phi = None
         self.labels = labels
 
+    @classmethod
+    def _profile_to_corpus(cls, profile):
+        id2word = dict(enumerate(profile.index))
+        sp = sparse.csr_matrix(profile.values)
+        corpus = [
+            [(sp.indices[j], sp.data[j])
+             for j in range(sp.indptr[i], sp.indptr[i+1])]
+            for i in range(len(sp.indptr)-1)]
+        return (corpus, id2word)
+        
     @classmethod
     def _phi_to_mat(cls, phi_file, n_topics):
         mask = 2 ** (n_topics-1).bit_length() - 1
@@ -96,6 +90,12 @@ class LDA(TopicModelBase):
         self.phi = LDA._phi_to_mat(self.phi_file, self.n_topics)
         return self.phi
 
+    def _estimate_gensim(self):
+        lda = LdaMulticore(self.corpus,
+                           # id2word=self.id2word,
+                           num_topics=self.n_topics)
+                           
+
     def _estimate_mallet(self):
         """
         the result will be stored in the outdir you specified
@@ -128,7 +128,7 @@ class LDA(TopicModelBase):
     def estimate(self):
         self.is_trained = True
         if isinstance(self.sampler, GibbsSampler):
-            self._estimate_mallet()
+            self._estimate_gensim()
         else:
             self._estimate_celltree()
 
