@@ -8,7 +8,7 @@ def load_klein():
     Droplet barcoding for single-cell transcriptomics applied to embryonic
     stem cells. Cell 2015 May 21;161(5):1187-1201. PMID: 26000487
     GSE65525
-    
+
     note: this data is modified from its origin.
     """
     datadir = Path(__file__).parent.joinpath('data/klein')
@@ -16,5 +16,3 @@ def load_klein():
     with open(str(datadir.joinpath('labels.txt').resolve()), 'r') as f:
         labels = f.read().split()
     return (profile, labels)
-    
-

@@ -25,4 +25,4 @@ class TestLDA(unittest.TestCase):
             n_topics=4,
             profile=profile,
         )
-        lda.estimate()
+        print(lda.estimate())
