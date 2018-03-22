@@ -22,6 +22,12 @@ class TopicModelBase(object):
         else:
             self.sampler = sampler
 
+    def get_cell_topic_matrix(self):
+        raise NotImplementedError()
+    
+    def get_topic_gene_matrix(self):
+        raise NotImplementedError()
+
 
 class LDA(TopicModelBase):
     def __init__(self, n_topics, profile, outdir, sampler='default',
@@ -88,11 +94,11 @@ class LDA(TopicModelBase):
 
         return phi_mat
 
-    def load_theta(self):
+    def get_cell_topic_matrix(self):
         self.theta = np.loadtxt(self.theta_file.resolve(), delimiter=',')
         return self.theta
 
-    def load_phi(self):
+    def get_topic_gene_matrix(self):
         self.phi = LDA._phi_to_mat(self.phi_file, self.n_topics)
         return self.phi
 
