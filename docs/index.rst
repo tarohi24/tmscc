@@ -8,7 +8,7 @@ Topic Models for Single Cell Clustering's documentation
    readme
    installation
    usage
-   modules
+   datasets
 
 .. toctree::
    :maxdepth: 1

@@ -16,7 +16,7 @@ class TestLDA(unittest.TestCase):
         )
         self.outdir = Path(__file__).parent.joinpath('data').resolve()
 
-    def test_estimate_klein(self):
+    def test_load_klein_data(self):
         profile, _ = datasets.load_klein()
         lda = LDA(
             n_topics=4,

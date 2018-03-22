@@ -16,5 +16,3 @@ def load_klein():
     with open(str(datadir.joinpath('labels.txt').resolve()), 'r') as f:
         labels = f.read().split()
     return (profile, labels)
-    
-
