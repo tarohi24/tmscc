@@ -1,3 +1,4 @@
+import pandas as pd
 from pathlib import Path
 import numpy as np
 import subprocess
@@ -24,7 +25,7 @@ class TopicModelBase(object):
 
     def get_cell_topic_matrix(self):
         raise NotImplementedError()
-    
+
     def get_topic_gene_matrix(self):
         raise NotImplementedError()
 
@@ -68,7 +69,7 @@ class LDA(TopicModelBase):
         self.labels = labels
 
     @classmethod
-    def _phi_to_mat(cls, phi_file, n_topics):
+    def _phi_to_mat(cls, phi_file, n_topics, gene_list):
         mask = 2 ** (n_topics-1).bit_length() - 1
         mask_len = mask.bit_length()
 
@@ -92,14 +93,18 @@ class LDA(TopicModelBase):
                 except:
                     print(i, topic, n_topics)
 
-        return phi_mat
+        phi_df = pd.DataFrame(phi_mat)
+        phi_df.index = gene_list
+        phi_df.columns = range(n_topics)
+        return phi_df
 
     def get_cell_topic_matrix(self):
         self.theta = np.loadtxt(self.theta_file.resolve(), delimiter=',')
         return self.theta
 
     def get_topic_gene_matrix(self):
-        self.phi = LDA._phi_to_mat(self.phi_file, self.n_topics)
+        self.phi = LDA._phi_to_mat(self.phi_file, self.n_topics,
+                                   self.profile.index)
         return self.phi
 
     def _estimate_mallet(self):
@@ -122,8 +127,8 @@ class LDA(TopicModelBase):
         proc = subprocess.Popen(' '.join(cmd), shell=True)
         proc.wait()
         sys.stderr.write('loading result...')
-        self.load_theta()
-        self.load_phi()
+        self.get_cell_topic_matrix()
+        self.get_topic_gene_matrix()
         sys.stderr.write('\ndone!')
 
     def _estimate_celltree(self):
